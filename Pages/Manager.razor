@@ -1,0 +1,6 @@
+@attribute [Authorize(Roles="Admin,Manager")]
+<PageTitle>Manager</PageTitle>
+<h3>Manager Dashboard</h3>
+<AuthorizeView Policy="CanApprove">
+    <button class="btn btn-success">Approve Selected</button>
+</AuthorizeView>

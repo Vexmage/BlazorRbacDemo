@@ -1,0 +1,13 @@
+@page "/me"
+@attribute [Authorize]
+<PageTitle>My Dashboard</PageTitle>
+
+<AuthorizeView>
+    <Authorized Context="auth">
+        <h3>My Work</h3>
+        <p>Welcome, @auth.User.Identity?.Name</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not logged in. <a href="Identity/Account/Login">Login</a></p>
+    </NotAuthorized>
+</AuthorizeView>

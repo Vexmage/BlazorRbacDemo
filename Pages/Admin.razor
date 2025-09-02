@@ -1,0 +1,6 @@
+@attribute [Authorize(Roles="Admin")]
+<PageTitle>Admin</PageTitle>
+<h3>Admin Dashboard</h3>
+<AuthorizeView Policy="CanExport">
+    <button class="btn btn-primary">Export System Report</button>
+</AuthorizeView>
