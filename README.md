@@ -31,3 +31,30 @@ This project shows how to implement **roles, claims-based policies, and guarded 
    ```bash
    git clone https://github.com/<your-username>/BlazorRbacDemo.git
    cd BlazorRbacDemo
+2. Apply migrations & create the SQLite database:
+   dotnet ef database update
+3. Run the app:
+   dotnet run
+4. Navigate to https://localhost:5001
+
+📸 Screenshots (TBD)
+
+🔮 Next Steps
+
+Add a data grid with CRUD operations gated by role
+
+Export reports to CSV/Excel (Admin only)
+
+Replace SQLite with SQL Server or PostgreSQL for enterprise use
+
+Deploy to Azure App Service for live demo access
+
+📚 Tech Stack
+
+Blazor Server (.NET 9)
+
+ASP.NET Core Identity
+
+Entity Framework Core 9 (SQLite provider)
+
+Bootstrap 5 for UI
