@@ -1,11 +1,8 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using BlazorRbacDemo;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-
 
 public class SeedDataService : IHostedService
 {

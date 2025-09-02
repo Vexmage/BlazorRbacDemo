@@ -1,9 +1,10 @@
+using BlazorRbacDemo; // <-- AppUser, AppDbContext
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders()
-.AddDefaultUI(); // uses Microsoft.AspNetCore.Identity.UI
+.AddDefaultUI();
 
 builder.Services.AddAuthorization(opts =>
 {
@@ -29,8 +30,6 @@ builder.Services.AddAuthorization(opts =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-
-// seed roles/users on startup
 builder.Services.AddHostedService<SeedDataService>();
 
 var app = builder.Build();
@@ -48,7 +47,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages(); // Identity UI endpoints
+app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

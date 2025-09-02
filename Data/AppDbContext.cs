@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿namespace BlazorRbacDemo;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class AppUser : Microsoft.AspNetCore.Identity.IdentityUser { }
+public class AppUser : IdentityUser { }
 
 public class AppDbContext : IdentityDbContext<AppUser>
 {

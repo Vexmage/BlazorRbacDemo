@@ -1,0 +1,32 @@
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.DependencyInjection
+@using BlazorRbacDemo
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    // Resolve services from DI to avoid @inject parsing issues
+    var signInManager = Context.RequestServices.GetRequiredService<SignInManager<AppUser>>();
+    var userManager = Context.RequestServices.GetRequiredService<UserManager<AppUser>>();
+}
+
+<ul class="navbar-nav">
+    @if (signInManager.IsSignedIn(User))
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">
+            Hello @userManager.GetUserName(User)!
+        </a>
+    </li>
+    <li class="nav-item">
+        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+            <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    </li>
+}
+</ul>
