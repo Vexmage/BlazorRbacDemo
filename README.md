@@ -21,6 +21,8 @@ Shows **roles**, **claims-based policies**, guarded navigation, and **Admin-only
 
 ## Seeded Users
 
+(Demo accounts are seeded locally for testing — not connected to any external service.)
+
 | Role    | Email                 | Password   | Access                          |
 |---------|-----------------------|------------|---------------------------------|
 | Admin   | `admin@demo.local`   | `P@ssw0rd!` | Admin + Manager + User pages<br/>Can Approve + Export |
@@ -94,13 +96,11 @@ GET /exports/system-report.csv
 
 🔮 Next Steps
 
-Add a data grid with CRUD operations gated by role
+- [ ] Add a data grid with CRUD operations gated by role  
+- [ ] Export reports to CSV/Excel (Admin only)  
+- [ ] Replace SQLite with SQL Server or PostgreSQL for enterprise use  
+- [ ] Deploy to Azure App Service for live demo access  
 
-Export reports to CSV/Excel (Admin only)
-
-Replace SQLite with SQL Server or PostgreSQL for enterprise use
-
-Deploy to Azure App Service for live demo access
 
 📚 Tech Stack
 
