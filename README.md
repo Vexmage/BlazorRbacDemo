@@ -1,5 +1,9 @@
 # Blazor RBAC Demo
 
+![.NET 9](https://img.shields.io/badge/.NET-9.0-blue)  
+![Blazor Server](https://img.shields.io/badge/Blazor-Server-purple)  
+![License](https://img.shields.io/badge/License-MIT-green)  
+
 Role-based access control (RBAC) demo built with **Blazor Server (.NET 9)** and **ASP.NET Core Identity**.  
 Shows **roles**, **claims-based policies**, guarded navigation, and **Admin-only CSV export**—the kind of patterns common in ERP/LOB apps.
 
