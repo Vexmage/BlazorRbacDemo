@@ -4,10 +4,113 @@
 
 <AuthorizeView>
     <Authorized Context="auth">
-        <h3>My Work</h3>
-        <p>Welcome, @auth.User.Identity?.Name</p>
+        <div class="container py-3">
+            <h3 class="mb-3">My Dashboard</h3>
+
+            <!-- Profile summary -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">@DisplayName(auth)</h5>
+                    <p class="card-text text-muted mb-2">@UserEmail(auth)</p>
+
+                    <div>
+                        <span class="me-2 fw-semibold">Roles:</span>
+                        @foreach (var r in KnownRoles)
+                        {
+                            if (auth.User.IsInRole(r))
+                            {
+                                <span class="badge bg-primary me-1">@r</span>
+                            }
+                        }
+                        @if (!KnownRoles.Any(auth.User.IsInRole))
+                        {
+                            <span class="text-muted">None</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick links -->
+            <div class="mb-3">
+                <a class="btn btn-outline-secondary me-2" href="Identity/Account/Manage">Account Settings</a>
+                <a class="btn btn-outline-secondary" href="Identity/Account/Logout">Logout</a>
+            </div>
+
+            <!-- My work area (placeholder content you can expand later) -->
+            <div class="card mb-3">
+                <div class="card-header">My Work</div>
+                <div class="card-body">
+                    <p class="mb-0">Welcome back, <strong>@auth.User.Identity?.Name</strong>. 
+                       This is your personal workspace. In a real app, this would show your tasks, 
+                       notifications, or recent activity.</p>
+                </div>
+            </div>
+
+            <!-- Claims viewer (handy for demos) -->
+            <div class="card">
+                <div class="card-header">My Claims</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in auth.User.Claims.OrderBy(c => c.Type))
+                            {
+                                <tr>
+                                    <td class="text-break">@ShortClaimType(c.Type)</td>
+                                    <td class="text-break">@c.Value</td>
+                                </tr>
+                            }
+                            @if (!auth.User.Claims.Any())
+                            {
+                                <tr><td colspan="2" class="text-muted">No claims.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </Authorized>
+
     <NotAuthorized>
-        <p>You are not logged in. <a href="Identity/Account/Login">Login</a></p>
+        <div class="container py-3">
+            <div class="alert alert-info">
+                You are not logged in. <a href="Identity/Account/Login" class="alert-link">Login</a>
+            </div>
+        </div>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    // Known roles you use in the demo so we can show neat badges
+    private static readonly string[] KnownRoles = new[] { "Admin", "Manager", "User" };
+
+    private static string DisplayName(AuthenticationState auth)
+        => auth.User.Identity?.Name ?? "(unknown)";
+
+    private static string UserEmail(AuthenticationState auth)
+    {
+        // Common claim types for email
+        var email = auth.User.Claims.FirstOrDefault(c =>
+            c.Type == System.Security.Claims.ClaimTypes.Email ||
+            c.Type.Equals("email", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        return email ?? "(no email)";
+    }
+
+    private static string ShortClaimType(string type)
+    {
+        // Make long claim URIs friendlier in the table
+        return type switch
+        {
+            var t when t.EndsWith("/name", StringComparison.OrdinalIgnoreCase) => "name",
+            var t when t.EndsWith("/emailaddress", StringComparison.OrdinalIgnoreCase) => "email",
+            var t when t.EndsWith("/role", StringComparison.OrdinalIgnoreCase) => "role",
+            _ => type
+        };
+    }
+}

@@ -1,6 +1,78 @@
+@page "/manager"
 @attribute [Authorize(Roles="Admin,Manager")]
 <PageTitle>Manager</PageTitle>
-<h3>Manager Dashboard</h3>
-<AuthorizeView Policy="CanApprove">
-    <button class="btn btn-success">Approve Selected</button>
-</AuthorizeView>
+
+<div class="container py-3">
+    <h3 class="mb-3">Manager Dashboard</h3>
+    <p class="text-muted">Managers can view pending requests and approve them. Admins also have access here.</p>
+
+    <AuthorizeView Policy="CanApprove">
+        <table class="table table-bordered table-sm align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Request</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var req in Requests)
+                {
+                    <tr>
+                        <td>@req.Id</td>
+                        <td>@req.Description</td>
+                        <td>
+                            @if (req.Approved)
+                            {
+                                <span class="badge bg-success">Approved</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!req.Approved)
+                            {
+                                <button class="btn btn-sm btn-success" @onclick="() => Approve(req.Id)">
+                                    Approve
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Done</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </AuthorizeView>
+</div>
+
+@code {
+    private List<RequestItem> Requests = new()
+    {
+        new RequestItem { Id = 1, Description = "Purchase order #123", Approved = false },
+        new RequestItem { Id = 2, Description = "Vacation request (Alice)", Approved = false },
+        new RequestItem { Id = 3, Description = "Budget allocation Q4", Approved = true }
+    };
+
+    private void Approve(int id)
+    {
+        var req = Requests.FirstOrDefault(r => r.Id == id);
+        if (req != null)
+        {
+            req.Approved = true;
+            StateHasChanged();
+        }
+    }
+
+    private class RequestItem
+    {
+        public int Id { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public bool Approved { get; set; }
+    }
+}
