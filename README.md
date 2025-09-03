@@ -71,7 +71,26 @@ GET /exports/system-report.csv
    dotnet run
 4. Navigate to https://localhost:5001
 
-📸 Screenshots (TBD)
+## 📸 Screenshots
+
+### 🔐 Login
+![Login](docs/Screenshot-Login.png)
+
+### 🏠 Home / Role Matrix
+![Home](docs/ScreenshotHome.png)
+
+### 👤 User Dashboard
+![User Dashboard](docs/ScreenshotUserDashboard.png)
+
+### 👔 Manager Dashboard
+![Manager Dashboard](docs/ScreenshotManagerDashboard.png)
+
+### 🛡️ Admin Dashboard
+![Admin Dashboard](docs/ScreenshotAdminDashboard.png)
+
+### 📄 CSV Export
+![System Report](docs/ScreenshotSystemReport.png)
+
 
 🔮 Next Steps
 
