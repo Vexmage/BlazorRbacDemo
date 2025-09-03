@@ -88,10 +88,6 @@ GET /exports/system-report.csv
 ### 🛡️ Admin Dashboard
 ![Admin Dashboard](docs/ScreenshotAdminDashboard.png)
 
-### 📄 CSV Export
-![System Report](docs/ScreenshotSystemReport.png)
-
-
 🔮 Next Steps
 
 Add a data grid with CRUD operations gated by role
