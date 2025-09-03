@@ -1,6 +1,13 @@
+@page "/admin"
 @attribute [Authorize(Roles="Admin")]
 <PageTitle>Admin</PageTitle>
-<h3>Admin Dashboard</h3>
-<AuthorizeView Policy="CanExport">
-    <button class="btn btn-primary">Export System Report</button>
-</AuthorizeView>
+
+<div class="container py-3">
+    <h3 class="mb-3">Admin Dashboard</h3>
+
+    <AuthorizeView Policy="CanExport">
+        <a class="btn btn-primary" href="/exports/system-report.csv">Export System Report (CSV)</a>
+    </AuthorizeView>
+
+    <p class="text-muted mt-3">Only Admins can see this page. Export is protected by the <code>CanExport</code> policy.</p>
+</div>

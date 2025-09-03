@@ -1,4 +1,5 @@
-using BlazorRbacDemo; // <-- AppUser, AppDbContext
+using BlazorRbacDemo; // AppUser, AppDbContext
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +32,16 @@ builder.Services.AddAuthorization(opts =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHostedService<SeedDataService>();
+builder.Services.AddHttpContextAccessor(); // optional but useful
 
 var app = builder.Build();
+
+// OPTIONAL: auto-migrate DB on startup
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//     db.Database.Migrate();
+// }
 
 if (!app.Environment.IsDevelopment())
 {
@@ -46,6 +55,15 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// CSV export endpoint (policy-protected)
+app.MapGet("/exports/system-report.csv",
+    [Authorize(Policy = "CanExport")] () =>
+    {
+        var csv = "Id,Name,Status\n1,Foo,Active\n2,Bar,Pending\n";
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+        return Results.File(bytes, "text/csv", "SystemReport.csv");
+    });
 
 app.MapRazorPages();
 app.MapBlazorHub();

@@ -1,9 +1,47 @@
 ﻿@page "/"
+<PageTitle>Home</PageTitle>
 
-<PageTitle>Index</PageTitle>
+<div class="container py-4">
+    <h2 class="mb-3">Blazor RBAC Demo</h2>
+    <p class="text-muted">Role-based dashboards with ASP.NET Core Identity & claims policies.</p>
 
-<h1>Hello, world!</h1>
+    <h4 class="mt-4">Quick Links</h4>
+    <ul>
+        <li><a href="me">My Dashboard</a></li>
+        <li><a href="manager">Manager Dashboard</a> (Manager/Admin)</li>
+        <li><a href="admin">Admin Dashboard</a> (Admin)</li>
+        <li><a href="Identity/Account/Login">Login</a> / <a href="Identity/Account/Register">Register</a></li>
+    </ul>
 
-Welcome to your new app.
+    <h4 class="mt-4">Role Matrix</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr><th>Role</th><th>Pages</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Admin</td><td>Admin, Manager, Me</td><td>Export, Approve</td></tr>
+            <tr><td>Manager</td><td>Manager, Me</td><td>Approve</td></tr>
+            <tr><td>User</td><td>Me</td><td>—</td></tr>
+        </tbody>
+    </table>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    <h5 class="mt-4">Seeded Accounts</h5>
+    <ul class="small">
+        <li>admin@demo.local — Admin</li>
+        <li>manager@demo.local — Manager</li>
+        <li>user@demo.local — User</li>
+    </ul>
+
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <div class="alert alert-success mt-3 mb-0">
+                Logged in as <strong>@auth.User.Identity?.Name</strong>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="alert alert-info mt-3 mb-0">
+                You’re not logged in. <a href="Identity/Account/Login">Login</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
