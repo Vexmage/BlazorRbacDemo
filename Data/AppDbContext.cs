@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -21,5 +22,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
         builder.Entity<Order>()
                .Property(o => o.Amount)
                .HasColumnType("decimal(18,2)");
+
+        builder.Entity<AuditLog>()
+                .HasOne(al => al.Order)
+                .WithMany()            // or .WithMany(o => o.Logs) if you add a collection on Order
+                .HasForeignKey(al => al.OrderId)
+                .OnDelete(DeleteBehavior.SetNull);
     }
 }
