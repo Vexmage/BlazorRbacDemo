@@ -94,6 +94,16 @@ GET /exports/system-report.csv
 ### 🛡️ Admin Dashboard
 ![Admin Dashboard](docs/ScreenshotAdminDashboard.png)
 
+### 📦 Orders CRUD
+Users can create new orders, Managers can approve/reject submitted orders, and Admins have full control (edit/delete).  
+
+#### Creating / Editing Orders
+![Orders Create](docs/Screenshot-Orders-Edit.png)
+
+#### Orders List with Status & Actions
+![Orders List](docs/Screenshot-Orders-List.png)
+
+
 🔮 Next Steps
 
 - [ ] Add a data grid with CRUD operations gated by role  
