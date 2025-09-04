@@ -1,0 +1,85 @@
+@page "/logs"
+@using BlazorRbacDemo.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@attribute [Authorize]
+
+@inject AppDbContext Db
+@inject IHttpContextAccessor Http
+
+<PageTitle>Audit Log</PageTitle>
+<h3>Audit Log</h3>
+
+@code {
+    private List<AuditLog> Items = new();
+
+    private bool IsAdmin => Http.HttpContext!.User.IsInRole("Admin");
+    private bool IsManager => Http.HttpContext!.User.IsInRole("Manager");
+    private string? UserId => Http.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IQueryable<AuditLog> q = Db.AuditLogs
+            .Include(x => x.Order)
+            .OrderByDescending(x => x.OccurredAtUtc);
+
+        if (IsAdmin)
+        {
+            // see everything
+        }
+        else if (IsManager)
+        {
+            // Managers: show submitted/approved/rejected logs + anything they performed
+            q = q.Where(x =>
+                x.PerformedByUserId == UserId ||
+                x.Action == AuditAction.Submitted ||
+                x.Action == AuditAction.Approved ||
+                x.Action == AuditAction.Rejected);
+        }
+        else
+        {
+            // Users: only actions they performed, or logs tied to their own orders
+            q = q.Where(x => x.PerformedByUserId == UserId
+                             || (x.Order != null && x.Order.CreatedByUserId == UserId));
+        }
+
+        Items = await q.AsNoTracking().Take(500).ToListAsync();
+    }
+}
+
+<table class="table table-sm table-striped mt-3">
+    <thead class="table-light">
+        <tr>
+            <th>When (UTC)</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Order</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var x in Items)
+        {
+            <tr>
+                <td>@x.OccurredAtUtc.ToString("u")</td>
+                <td>@(x.PerformedByUserName ?? x.PerformedByUserId)</td>
+                <td><span class="badge bg-secondary">@x.Action</span></td>
+                <td>
+                    @if (x.OrderId is not null)
+                    {
+                        <span>#@x.OrderId @x.Order?.Title</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>@x.Details</td>
+            </tr>
+        }
+        @if (!Items.Any())
+        {
+            <tr><td colspan="5" class="text-muted">No log entries.</td></tr>
+        }
+    </tbody>
+</table>
