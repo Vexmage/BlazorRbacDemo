@@ -94,28 +94,33 @@ GET /exports/system-report.csv
 
 ## 📸 Screenshots
 
-### 🔐 Login
+### Case Study 1: RBAC Dashboards + Policies
+
+#### 🔐 Login
 ![Login](docs/Screenshot-Login.png)
 
-### 🏠 Home / Role Matrix
+#### 🏠 Home / Role Matrix
 ![Home](docs/ScreenshotHome.png)
 
-### 👤 User Dashboard
+#### 👤 User Dashboard
 ![User Dashboard](docs/ScreenshotUserDashboard.png)
 
-### 👔 Manager Dashboard
+#### 👔 Manager Dashboard
 ![Manager Dashboard](docs/ScreenshotManagerDashboard.png)
 
-### 🛡️ Admin Dashboard
+#### 🛡️ Admin Dashboard
 ![Admin Dashboard](docs/ScreenshotAdminDashboard.png)
 
-### 📦 Orders CRUD
+---
+### Case Study 2: Orders CRUD + Approvals
+
+#### 📦 Orders CRUD
 Users can create new orders, Managers can approve/reject submitted orders, and Admins have full control (edit/delete).  
 
-#### Creating / Editing Orders
+#### ✏️ Add / Edit Order
 ![Orders Create](docs/Screenshot-Orders-Edit.png)
 
-#### Orders List with Status & Actions
+#### 📋 Orders List
 ![Orders List](docs/Screenshot-Orders-List.png)
 
 
