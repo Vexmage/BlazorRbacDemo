@@ -1,0 +1,241 @@
+@page "/orders"
+@using BlazorRbacDemo.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@attribute [Authorize]
+
+@inject AppDbContext Db
+@inject IHttpContextAccessor Http
+@inject NavigationManager Nav
+
+<PageTitle>Orders</PageTitle>
+
+<h3 class="mb-3">Orders</h3>
+
+<div class="mb-3 d-flex gap-2">
+    <button class="btn btn-primary" @onclick="NewOrder">New Order</button>
+
+    <AuthorizeView Roles="Admin">
+        <a class="btn btn-outline-secondary"
+           href="/orders/export.csv"
+           target="_blank" rel="noopener">
+           Export CSV
+        </a>
+    </AuthorizeView>
+</div>
+
+<table class="table table-sm table-bordered align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th class="text-end">Amount</th>
+            <th>Status</th>
+            <th>Owner</th>
+            <th style="width:260px">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in OrderList)
+        {
+            <tr>
+                <td>@o.Id</td>
+                <td>@o.Title</td>
+                <td class="text-end">@o.Amount.ToString("N2")</td>
+                <td>
+                    @switch (o.Status)
+                    {
+                        case OrderStatus.Approved:
+                            <span class="badge bg-success">Approved</span>; break;
+                        case OrderStatus.Rejected:
+                            <span class="badge bg-danger">Rejected</span>; break;
+                        case OrderStatus.Submitted:
+                            <span class="badge bg-warning text-dark">Submitted</span>; break;
+                        default:
+                            <span class="badge bg-secondary">Draft</span>; break;
+                    }
+                </td>
+                <td class="text-truncate" style="max-width:180px">@o.CreatedByUserId</td>
+                <td>
+                    @if (CanEdit(o))
+                    {
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => Edit(o.Id)">Edit</button>
+                    }
+                    @if (CanApprove && o.Status == OrderStatus.Submitted)
+                    {
+                        <button class="btn btn-sm btn-success me-1" @onclick="() => Approve(o.Id)">Approve</button>
+                        <button class="btn btn-sm btn-outline-danger me-1" @onclick="() => Reject(o.Id)">Reject</button>
+                    }
+                    @if (IsAdmin)
+                    {
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => Delete(o.Id)">Delete</button>
+                    }
+                </td>
+            </tr>
+        }
+        @if (!OrderList.Any())
+        {
+            <tr><td colspan="6" class="text-muted">No orders yet.</td></tr>
+        }
+    </tbody>
+</table>
+
+@if (Editing is not null)
+{
+    <div class="card mt-3">
+        <div class="card-header">@((Editing.Id == 0 ? "New" : "Edit")) Order</div>
+        <div class="card-body">
+            <EditForm Model="Editing" OnValidSubmit="Save">
+                <DataAnnotationsValidator />
+                <div class="mb-2">
+                    <label class="form-label">Title</label>
+                    <InputText class="form-control" @bind-Value="Editing.Title" />
+                    <ValidationMessage For="() => Editing.Title" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Amount</label>
+                    <InputNumber class="form-control" @bind-Value="Editing.Amount" />
+                    <ValidationMessage For="() => Editing.Amount" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Status</label>
+                    <InputSelect class="form-select" @bind-Value="Editing.Status">
+                        @foreach (var s in Enum.GetValues<OrderStatus>())
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </InputSelect>
+                </div>
+                <button type="submit" class="btn btn-primary me-2">Save</button>
+                <button type="button" class="btn btn-outline-secondary" @onclick="Cancel">Cancel</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Order> OrderList = new();
+    private Order? Editing;
+
+    private ClaimsPrincipal User => Http.HttpContext!.User;
+    private bool IsAdmin => User.IsInRole("Admin");
+    private bool CanApprove => IsAdmin || User.IsInRole("Manager");
+    private string CurrentUserId =>
+        User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? User.Identity?.Name
+        ?? "unknown";
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        if (IsAdmin || CanApprove)
+        {
+            OrderList = await Db.Orders
+                .OrderByDescending(o => o.Id)
+                .ToListAsync();
+        }
+        else
+        {
+            OrderList = await Db.Orders
+                .Where(o => o.CreatedByUserId == CurrentUserId)
+                .OrderByDescending(o => o.Id)
+                .ToListAsync();
+        }
+    }
+
+    private void NewOrder()
+    {
+        Editing = new Order
+        {
+            Title = "",
+            Amount = 0m,
+            Status = OrderStatus.Draft,
+            CreatedByUserId = CurrentUserId,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+    }
+
+    private async Task Edit(int id)
+    {
+        var o = await Db.Orders.FindAsync(id);
+        if (o is null) return;
+        if (!CanEdit(o)) return;
+
+        // shallow copy for editing (avoid binding directly to tracked entity)
+        Editing = new Order
+        {
+            Id = o.Id,
+            Title = o.Title,
+            Amount = o.Amount,
+            Status = o.Status,
+            CreatedByUserId = o.CreatedByUserId,
+            CreatedAtUtc = o.CreatedAtUtc,
+            RowVersion = o.RowVersion
+        };
+    }
+
+    private bool CanEdit(Order o) =>
+        IsAdmin || o.CreatedByUserId == CurrentUserId || (CanApprove && o.Status != OrderStatus.Approved);
+
+    private async Task Save()
+    {
+        if (Editing is null) return;
+
+        if (Editing.Id == 0)
+        {
+            Db.Orders.Add(Editing);
+        }
+        else
+        {
+            Db.Orders.Update(Editing);
+        }
+
+        try
+        {
+            await Db.SaveChangesAsync();
+            Editing = null;
+            await Load();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // TODO: show friendly alert/toast
+        }
+    }
+
+    private void Cancel() => Editing = null;
+
+    private async Task Approve(int id)
+    {
+        if (!CanApprove) return;
+        var o = await Db.Orders.FindAsync(id);
+        if (o is null) return;
+
+        o.Status = OrderStatus.Approved;
+        o.ApprovedAtUtc = DateTime.UtcNow;
+        await Db.SaveChangesAsync();
+        await Load();
+    }
+
+    private async Task Reject(int id)
+    {
+        if (!CanApprove) return;
+        var o = await Db.Orders.FindAsync(id);
+        if (o is null) return;
+
+        o.Status = OrderStatus.Rejected;
+        await Db.SaveChangesAsync();
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        if (!IsAdmin) return;
+        var o = await Db.Orders.FindAsync(id);
+        if (o is null) return;
+
+        Db.Remove(o);
+        await Db.SaveChangesAsync();
+        await Load();
+    }
+}

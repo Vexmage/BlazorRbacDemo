@@ -57,13 +57,33 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // CSV export endpoint (policy-protected)
-app.MapGet("/exports/system-report.csv",
-    [Authorize(Policy = "CanExport")] () =>
+app.MapGet("/orders/export.csv", [Authorize(Roles = "Admin")] async (AppDbContext db) =>
+{
+    var rows = await db.Orders
+        .OrderBy(o => o.Id)
+        .Select(o => new
+        {
+            o.Id,
+            o.Title,
+            o.Amount,
+            o.Status,
+            o.CreatedByUserId,
+            o.CreatedAtUtc,
+            o.ApprovedAtUtc
+        })
+        .ToListAsync();
+
+    var sb = new System.Text.StringBuilder();
+    sb.AppendLine("Id,Title,Amount,Status,CreatedBy,CreatedAtUtc,ApprovedAtUtc");
+    foreach (var r in rows)
     {
-        var csv = "Id,Name,Status\n1,Foo,Active\n2,Bar,Pending\n";
-        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
-        return Results.File(bytes, "text/csv", "SystemReport.csv");
-    });
+        var safeTitle = (r.Title ?? string.Empty).Replace("\"", "\"\"");
+        sb.AppendLine($"{r.Id},\"{safeTitle}\",{r.Amount},{r.Status},{r.CreatedByUserId},{r.CreatedAtUtc:o},{r.ApprovedAtUtc:o}");
+    }
+
+    var bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+    return Results.File(bytes, "text/csv", "Orders.csv");
+});
 
 app.MapRazorPages();
 app.MapBlazorHub();
