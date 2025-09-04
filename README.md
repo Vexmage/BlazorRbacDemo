@@ -17,7 +17,6 @@ This project demonstrates common enterprise patterns through two focused case st
   - Admins can edit/delete any order and export to CSV.
 
   - **Case Study 3: Audit Log / Activity History**  
-  Full CRUD page for an `Order` entity with role-gated actions:  
   - Tracks key user actions (create, update, approve, reject, delete) on Orders.
   - Each log entry records timestamp, user, action type, and details for accountability.
 
