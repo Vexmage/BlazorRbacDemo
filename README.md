@@ -16,6 +16,11 @@ This project demonstrates common enterprise patterns through two focused case st
   - Managers can approve/reject submitted orders.  
   - Admins can edit/delete any order and export to CSV.
 
+  - **Case Study 3: Audit Log / Activity History**  
+  Full CRUD page for an `Order` entity with role-gated actions:  
+  - Tracks key user actions (create, update, approve, reject, delete) on Orders.
+  - Each log entry records timestamp, user, action type, and details for accountability.
+
 ---
 
 ## ✨ Highlights
@@ -30,6 +35,10 @@ This project demonstrates common enterprise patterns through two focused case st
   - Create, edit, delete, approve, reject workflow  
   - Role-gated actions (User, Manager, Admin)  
   - Concurrency-safe EF Core updates
+- **Case Study 3: Audit Log / Activity History**  
+  - Automatic audit logging on all order actions
+  - Viewable logs page (/logs) for Admins
+  - Robust handling of deletes (retains history even when order is gone)
 - Clean **Nav** using `<AuthorizeView>` and protected routes via `[Authorize]`
 
 ---
@@ -69,6 +78,10 @@ My Dashboard (/me) – profile card, role badges, claims viewer
 Manager (/manager) – pending requests table, approve action (policy-gated)
 
 Admin (/admin) – Admin-only; CSV export link (policy-gated)
+
+Orders (/orders) – CRUD + approvals with role/claim enforcement
+
+Audit Logs (/logs) – activity history with filters by action/user
 
 ---
 
@@ -123,6 +136,15 @@ Users can create new orders, Managers can approve/reject submitted orders, and A
 #### 📋 Orders List
 ![Orders List](docs/Screenshot-Orders-List.png)
 
+---
+### Case Study 3: Activity History
+
+#### 📜 Audit Logs
+Admins can review all order actions (create, update, approve, reject, delete).
+Entries show timestamp, user, action, and details for traceability.
+![Audit Logs](docs/Screenshot-AuditLog.png)
+
+
 
 🔮 Next Steps
 
@@ -133,12 +155,16 @@ Users can create new orders, Managers can approve/reject submitted orders, and A
 
 **Case Study 2: Orders CRUD + Approvals**
 - [ ] Add file attachments (e.g., PDFs, invoices) to orders
-- [ ] Implement audit logs for approvals/rejections
 - [ ] Add pagination, filtering, and search to the Orders grid
 - [ ] Export orders to CSV/Excel (Admin only)
-- [ ] Replace SQLite with SQL Server/PostgreSQL for enterprise workflows
+
+**Case Study 3: Audit Logs / Activity History**
+- [ ] Add filtering by user/date/action
+- [ ] Export logs to CSV/Excel
+- [ ] Integrate with external monitoring tools
 
 **General / Infrastructure**
+- [ ] Replace SQLite with SQL Server/PostgreSQL for enterprise workflows
 - [ ] Deploy to Azure App Service for live demo access
 - [ ] Improve UI polish with Bootstrap cards, modals, and responsive layout 
 
@@ -159,12 +185,16 @@ Bootstrap 5 for UI
 Data/
   AppDbContext.cs        # AppUser + DbContext
   SeedDataService.cs     # seeds roles/users/claims
+Models/
+  Order.cs               # Order entity
+  AuditLog.cs            # Audit entity
 Pages/
   Index.razor            # Role matrix & quick links
   Me.razor               # Profile dashboard
   Manager.razor          # Approvals (policy-gated)
   Admin.razor            # Export (policy-gated)
-  _ViewImports.cshtml
+  Orders.razor           # Orders CRUD + approvals
+  Logs.razor             # Audit log viewer
   Shared/_LoginPartial.cshtml
 Program.cs               # Identity, policies, minimal API for CSV
 
