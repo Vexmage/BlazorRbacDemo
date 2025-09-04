@@ -126,10 +126,21 @@ Users can create new orders, Managers can approve/reject submitted orders, and A
 
 🔮 Next Steps
 
-- [ ] Add a data grid with CRUD operations gated by role  
-- [ ] Export reports to CSV/Excel (Admin only)  
-- [ ] Replace SQLite with SQL Server or PostgreSQL for enterprise use  
-- [ ] Deploy to Azure App Service for live demo access  
+**Case Study 1: RBAC Dashboards + Policies**
+- [ ] Add external authentication providers (Google, Microsoft, etc.)
+- [ ] Role management UI for Admins (create/edit roles, assign users)
+- [ ] Expand claims-based policies (e.g., `CanDelete`, `CanViewReports`)
+
+**Case Study 2: Orders CRUD + Approvals**
+- [ ] Add file attachments (e.g., PDFs, invoices) to orders
+- [ ] Implement audit logs for approvals/rejections
+- [ ] Add pagination, filtering, and search to the Orders grid
+- [ ] Export orders to CSV/Excel (Admin only)
+- [ ] Replace SQLite with SQL Server/PostgreSQL for enterprise workflows
+
+**General / Infrastructure**
+- [ ] Deploy to Azure App Service for live demo access
+- [ ] Improve UI polish with Bootstrap cards, modals, and responsive layout 
 
 
 📚 Tech Stack
