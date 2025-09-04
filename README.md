@@ -5,7 +5,16 @@
 ![License](https://img.shields.io/badge/License-MIT-green)  
 
 Role-based access control (RBAC) demo built with **Blazor Server (.NET 9)** and **ASP.NET Core Identity**.  
-Shows **roles**, **claims-based policies**, guarded navigation, and **Admin-only CSV export**—the kind of patterns common in ERP/LOB apps.
+This project demonstrates common enterprise patterns through two focused case studies:
+
+- **Case Study 1: RBAC Dashboards + Policies**  
+  Seeded roles (Admin / Manager / User), claims-based policies (`CanApprove`, `CanExport`), guarded dashboards, and Admin-only CSV export.
+
+- **Case Study 2: Orders CRUD + Approvals**  
+  Full CRUD page for an `Order` entity with role-gated actions:  
+  - Users can create/edit their own orders.  
+  - Managers can approve/reject submitted orders.  
+  - Admins can edit/delete any order and export to CSV.
 
 ---
 
@@ -13,10 +22,16 @@ Shows **roles**, **claims-based policies**, guarded navigation, and **Admin-only
 
 - **ASP.NET Core Identity** with EF Core (SQLite)
 - **Seeded roles & users**: Admin, Manager, User
-- **Claims-based policies**: `CanApprove`, `CanExport`
-- **Role-based dashboards**: Admin / Manager / User
-- **Admin-only CSV export** at `/exports/system-report.csv`
+- **Case Study 1: Dashboards & Policies**  
+  - Claims-based policies: `CanApprove`, `CanExport`  
+  - Role-based dashboards: Admin / Manager / User  
+  - Admin-only CSV export at `/exports/system-report.csv`
+- **Case Study 2: Orders CRUD + Approvals**  
+  - Create, edit, delete, approve, reject workflow  
+  - Role-gated actions (User, Manager, Admin)  
+  - Concurrency-safe EF Core updates
 - Clean **Nav** using `<AuthorizeView>` and protected routes via `[Authorize]`
+
 ---
 
 ## Seeded Users
