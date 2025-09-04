@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using BlazorRbacDemo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHostedService<SeedDataService>();
 builder.Services.AddHttpContextAccessor(); // optional but useful
+builder.Services.AddScoped<IAuditLogger, AuditLogger>();
 
 var app = builder.Build();
 
