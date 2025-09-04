@@ -7,6 +7,8 @@
 @inject AppDbContext Db
 @inject IHttpContextAccessor Http
 @inject NavigationManager Nav
+@inject BlazorRbacDemo.Services.IAuditLogger Audit
+
 
 <PageTitle>Orders</PageTitle>
 
@@ -180,46 +182,50 @@
     private bool CanEdit(Order o) =>
         IsAdmin || o.CreatedByUserId == CurrentUserId || (CanApprove && o.Status != OrderStatus.Approved);
 
-private async Task Save()
-{
-    if (Editing is null) return;
 
-    if (Editing.Id == 0)
+    private async Task Save()
     {
-        // create
-        Db.Orders.Add(Editing);
-    }
-    else
-    {
-        // update: load the tracked entity first, then copy values
-        var existing = await Db.Orders.FindAsync(Editing.Id);
-        if (existing is null) return;
+        if (Editing is null) return;
 
-        // copy editable fields
-        existing.Title = Editing.Title;
-        existing.Amount = Editing.Amount;
-        existing.Status = Editing.Status;
+        // CREATE
+        if (Editing.Id == 0)
+        {
+            Db.Orders.Add(Editing);
+            await Db.SaveChangesAsync(); // get new Id first
 
-        // optional: if you want to preserve CreatedBy/CreatedAt as original, do nothing
-        // existing.CreatedByUserId = existing.CreatedByUserId;
-        // existing.CreatedAtUtc = existing.CreatedAtUtc;
+            await Audit.LogAsync(
+                AuditAction.Created,
+                Editing.Id,
+                $"Order '{Editing.Title}' created (Amount {Editing.Amount:N2}).",
+                Http.HttpContext?.User
+            );
+        }
+        else
+        {
+            // UPDATE: load tracked entity, copy fields, save, then log
+            var existing = await Db.Orders.FindAsync(Editing.Id);
+            if (existing is null) return;
 
-        // --- Optional concurrency handling if you keep RowVersion ---
-        // If you're binding RowVersion in the edit form, uncomment:
-        // Db.Entry(existing).Property(e => e.RowVersion).OriginalValue = Editing.RowVersion!;
-    }
+            existing.Title  = Editing.Title;
+            existing.Amount = Editing.Amount;
+            existing.Status = Editing.Status;
 
-    try
-    {
-        await Db.SaveChangesAsync();
+            // Optional concurrency if you bind RowVersion in the form:
+            // Db.Entry(existing).Property(e => e.RowVersion).OriginalValue = Editing.RowVersion!;
+
+            await Db.SaveChangesAsync();
+
+            await Audit.LogAsync(
+                AuditAction.Updated,
+                existing.Id,
+                $"Order '{existing.Title}' updated (Status {existing.Status}, Amount {existing.Amount:N2}).",
+                Http.HttpContext?.User
+            );
+        }
+
         Editing = null;
         await Load();
     }
-    catch (DbUpdateConcurrencyException)
-    {
-        // TODO: show a friendly “this record was modified by someone else” message
-    }
-}
 
     private void Cancel() => Editing = null;
 
@@ -232,6 +238,11 @@ private async Task Save()
         o.Status = OrderStatus.Approved;
         o.ApprovedAtUtc = DateTime.UtcNow;
         await Db.SaveChangesAsync();
+
+        await Audit.LogAsync(
+            AuditAction.Approved, o.Id, "Order approved.", Http.HttpContext?.User
+        );
+
         await Load();
     }
 
@@ -243,6 +254,11 @@ private async Task Save()
 
         o.Status = OrderStatus.Rejected;
         await Db.SaveChangesAsync();
+
+        await Audit.LogAsync(
+            AuditAction.Rejected, o.Id, "Order rejected.", Http.HttpContext?.User
+        );
+
         await Load();
     }
 
@@ -254,6 +270,11 @@ private async Task Save()
 
         Db.Remove(o);
         await Db.SaveChangesAsync();
+
+        await Audit.LogAsync(
+            AuditAction.Deleted, o.Id, "Order deleted.", Http.HttpContext?.User
+        );
+
         await Load();
     }
 }
