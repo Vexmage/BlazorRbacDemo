@@ -262,19 +262,26 @@
         await Load();
     }
 
-    private async Task Delete(int id)
-    {
-        if (!IsAdmin) return;
-        var o = await Db.Orders.FindAsync(id);
-        if (o is null) return;
+private async Task Delete(int id)
+{
+    if (!IsAdmin) return;
 
-        Db.Remove(o);
-        await Db.SaveChangesAsync();
+    var o = await Db.Orders.FindAsync(id);
+    if (o is null) return;
 
-        await Audit.LogAsync(
-            AuditAction.Deleted, o.Id, "Order deleted.", Http.HttpContext?.User
-        );
+    // Log while the FK still exists (OrderId = id).
+    await Audit.LogAsync(
+        AuditAction.Deleted,
+        id,
+        $"Order {id} ('{o.Title}', {o.Amount:N2}) deleted.",
+        Http.HttpContext?.User
+    );
 
-        await Load();
-    }
+    Db.Remove(o);
+    await Db.SaveChangesAsync(); // FK will be set to NULL on AuditLogs
+
+    await Load();
+}
+
+
 }
