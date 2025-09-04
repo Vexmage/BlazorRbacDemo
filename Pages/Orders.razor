@@ -132,12 +132,14 @@
         if (IsAdmin || CanApprove)
         {
             OrderList = await Db.Orders
+                .AsNoTracking()
                 .OrderByDescending(o => o.Id)
                 .ToListAsync();
         }
         else
         {
             OrderList = await Db.Orders
+                .AsNoTracking()
                 .Where(o => o.CreatedByUserId == CurrentUserId)
                 .OrderByDescending(o => o.Id)
                 .ToListAsync();
@@ -178,30 +180,46 @@
     private bool CanEdit(Order o) =>
         IsAdmin || o.CreatedByUserId == CurrentUserId || (CanApprove && o.Status != OrderStatus.Approved);
 
-    private async Task Save()
+private async Task Save()
+{
+    if (Editing is null) return;
+
+    if (Editing.Id == 0)
     {
-        if (Editing is null) return;
-
-        if (Editing.Id == 0)
-        {
-            Db.Orders.Add(Editing);
-        }
-        else
-        {
-            Db.Orders.Update(Editing);
-        }
-
-        try
-        {
-            await Db.SaveChangesAsync();
-            Editing = null;
-            await Load();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            // TODO: show friendly alert/toast
-        }
+        // create
+        Db.Orders.Add(Editing);
     }
+    else
+    {
+        // update: load the tracked entity first, then copy values
+        var existing = await Db.Orders.FindAsync(Editing.Id);
+        if (existing is null) return;
+
+        // copy editable fields
+        existing.Title = Editing.Title;
+        existing.Amount = Editing.Amount;
+        existing.Status = Editing.Status;
+
+        // optional: if you want to preserve CreatedBy/CreatedAt as original, do nothing
+        // existing.CreatedByUserId = existing.CreatedByUserId;
+        // existing.CreatedAtUtc = existing.CreatedAtUtc;
+
+        // --- Optional concurrency handling if you keep RowVersion ---
+        // If you're binding RowVersion in the edit form, uncomment:
+        // Db.Entry(existing).Property(e => e.RowVersion).OriginalValue = Editing.RowVersion!;
+    }
+
+    try
+    {
+        await Db.SaveChangesAsync();
+        Editing = null;
+        await Load();
+    }
+    catch (DbUpdateConcurrencyException)
+    {
+        // TODO: show a friendly “this record was modified by someone else” message
+    }
+}
 
     private void Cancel() => Editing = null;
 
